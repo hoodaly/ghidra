@@ -500,13 +500,24 @@ public class FlatProgramAPI {
 	}
 
 	/**
-	 * Sets a EOL comment at the specified address
+	 * Sets an EOL comment at the specified address
 	 * @param address the address to set the EOL comment
 	 * @param comment the EOL comment
 	 * @return true if the EOL comment was successfully set
 	 */
 	public final boolean setEOLComment(Address address, String comment) {
 		SetCommentCmd cmd = new SetCommentCmd(address, CodeUnit.EOL_COMMENT, comment);
+		return cmd.applyTo(currentProgram);
+	}
+
+	/**
+	 * Sets a repeatable comment at the specified address
+	 * @param address the address to set the repeatable comment
+	 * @param comment the repeatable comment
+	 * @return true if the repeatable comment was successfully set
+	 */
+	public final boolean setRepeatableComment(Address address, String comment) {
+		SetCommentCmd cmd = new SetCommentCmd(address, CodeUnit.REPEATABLE_COMMENT, comment);
 		return cmd.applyTo(currentProgram);
 	}
 
@@ -566,6 +577,19 @@ public class FlatProgramAPI {
 	}
 
 	/**
+	 * Returns the repeatable comment at the specified address.  The comment returned is the raw text
+	 * of the comment.  Contrastingly, calling {@link GhidraScript#getRepeatableCommentAsRendered(Address)} will
+	 * return the text of the comment as it is rendered in the display.
+	 * @param address the address to get the comment
+	 * @return the repeatable comment at the specified address or null
+	 * if one does not exist
+	 * @see GhidraScript#getRepeatableCommentAsRendered(Address)
+	 */
+	public final String getRepeatableComment(Address address) {
+		return currentProgram.getListing().getComment(CodeUnit.REPEATABLE_COMMENT, address);
+	}
+
+	/**
 	 * Finds the first occurrence of the byte
 	 * starting from the address. If the start address
 	 * is null, then the find will start from the minimum address
@@ -600,7 +624,7 @@ public class FlatProgramAPI {
 	 * starting from the address. If the start address is null, then the find will start
 	 * from the minimum address of the program.
 	 * <p>
-	 * The <tt>byteString</tt> may contain regular expressions.  The following
+	 * The <code>byteString</code> may contain regular expressions.  The following
 	 * highlights some example search strings (note the use of double backslashes ("\\")):
 	 * <pre>
 	 *             "\\x80" - A basic search pattern for a byte value of 0x80
@@ -629,7 +653,7 @@ public class FlatProgramAPI {
 	 * the given byte string, starting from the address. If the start address is null, then the
 	 * find will start from the minimum address of the program.
 	 * <p>
-	 * The <tt>byteString</tt> may contain regular expressions.  The following
+	 * The <code>byteString</code> may contain regular expressions.  The following
 	 * highlights some example search strings (note the use of double backslashes ("\\")):
 	 * <pre>
 	 *             "\\x80" - A basic search pattern for a byte value of 0x80
@@ -655,7 +679,7 @@ public class FlatProgramAPI {
 	 * the given byte string, starting from the address. If the start address is null, then the
 	 * find will start from the minimum address of the program.
 	 * <p>
-	 * The <tt>byteString</tt> may contain regular expressions.  The following
+	 * The <code>byteString</code> may contain regular expressions.  The following
 	 * highlights some example search strings (note the use of double backslashes ("\\")):
 	 * <pre>
 	 *             "\\x80" - A basic search pattern for a byte value of 0x80
@@ -699,7 +723,7 @@ public class FlatProgramAPI {
 	 *
 	 * Note: The ranges within the addressSet are NOT treated as a contiguous set when searching
 	 * <p>
-	 * The <tt>byteString</tt> may contain regular expressions.  The following
+	 * The <code>byteString</code> may contain regular expressions.  The following
 	 * highlights some example search strings (note the use of double backslashes ("\\")):
 	 * <pre>
 	 *             "\\x80" - A basic search pattern for a byte value of 0x80
@@ -731,7 +755,7 @@ public class FlatProgramAPI {
 	 * treated as a contiguous set when searching.
 	 *
 	 * <p>
-	 * The <tt>byteString</tt> may contain regular expressions.  The following
+	 * The <code>byteString</code> may contain regular expressions.  The following
 	 * highlights some example search strings (note the use of double backslashes ("\\")):
 	 * <pre>
 	 *             "\\x80" - A basic search pattern for a byte value of 0x80
