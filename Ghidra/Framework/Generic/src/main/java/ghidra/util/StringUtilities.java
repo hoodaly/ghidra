@@ -83,6 +83,9 @@ public class StringUtilities {
 	public static final int UNICODE_LE16_BYTE_ORDER_MARK = 0x0____FFFE;
 	public static final int UNICODE_LE32_BYTE_ORDER_MARK = 0xFFFE_0000;
 
+	// This is Java's default rendered size of a tab (in spaces) 
+	public static final int DEFAULT_TAB_SIZE = 8;
+
 	private StringUtilities() {
 		// utility class; can't create
 	}
@@ -439,6 +442,19 @@ public class StringUtilities {
 		return true;
 	}
 
+
+	/**
+	 * Convert tabs in the given string to spaces using
+	 * a default tab width of 8 spaces.
+	 *
+	 * @param str
+	 *            string containing tabs
+	 * @return string that has spaces for tabs
+	 */
+	public static String convertTabsToSpaces(String str) {
+		return convertTabsToSpaces(str, DEFAULT_TAB_SIZE);
+	}
+
 	/**
 	 * Convert tabs in the given string to spaces.
 	 *
@@ -631,7 +647,9 @@ public class StringUtilities {
 		return location.getWord();
 	}
 
+
 	public static WordLocation findWordLocation(String s, int index, char[] charsToAllow) {
+
 		int len = s.length();
 		if (index < 0 || index >= len) {
 			return WordLocation.empty(s);
@@ -1062,17 +1080,5 @@ public class StringUtilities {
 			return escaped;
 		}
 		return new String(new int[] { codePoint }, 0, 1);
-	}
-
-	/**
-	 * Returns true if the specified code point is the 'replacement' code point 0xFFFD,
-	 * which is used when decoding bytes into unicode chars and there was a bad or invalid
-	 * sequence that does not have a mapping. (ie. decoding byte char 0x80 as US-ASCII)
-	 *
-	 * @param codePoint to test
-	 * @return boolean true if the char is 0xFFFD (ie. UNICODE REPLACEMENT char)
-	 */
-	public static boolean isUnicodeReplacementCodePoint(int codePoint) {
-		return codePoint == UNICODE_REPLACEMENT;
 	}
 }
