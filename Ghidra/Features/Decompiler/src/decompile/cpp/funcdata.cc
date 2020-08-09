@@ -20,7 +20,7 @@
 /// \param scope is Symbol scope associated with the function
 /// \param addr is the entry address for the function
 /// \param sz is the number of bytes (of code) in the function body
-Funcdata::Funcdata(const string &nm,Scope *scope,const Address &addr,int4 sz)
+Funcdata::Funcdata(const string &nm,Scope *scope,const Address &addr,FunctionSymbol *sym,int4 sz)
   : baseaddr(addr),
     funcp(),
     vbank(scope->getArch(),
@@ -31,11 +31,13 @@ Funcdata::Funcdata(const string &nm,Scope *scope,const Address &addr,int4 sz)
 
 {				// Initialize high-level properties of
 				// function by giving address and size
+  functionSymbol = sym;
   flags = 0;
   clean_up_index = 0;
   high_level_index = 0;
   cast_phase_index = 0;
   glb = scope->getArch();
+  minLanedSize = glb->getMinimumLanedRegisterSize();
   name = nm;
 
   size = sz;
@@ -69,6 +71,7 @@ void Funcdata::clear(void)
   clean_up_index = 0;
   high_level_index = 0;
   cast_phase_index = 0;
+  minLanedSize = glb->getMinimumLanedRegisterSize();
 
   localmap->clearUnlocked();	// Clear non-permanent stuff
   localmap->resetLocalWindow();
@@ -134,7 +137,7 @@ void Funcdata::startProcessing(void)
     warningHeader("This is an inlined function");
   Address baddr(baseaddr.getSpace(),0);
   Address eaddr(baseaddr.getSpace(),~((uintb)0));
-  followFlow(baddr,eaddr,0);
+  followFlow(baddr,eaddr);
   structureReset();
   sortCallSpecs();		// Must come after structure reset
   heritage.buildInfoList();
@@ -343,7 +346,7 @@ void Funcdata::spacebaseConstant(PcodeOp *op,int4 slot,SymbolEntry *entry,const 
 
   Symbol *sym = entry->getSymbol();
   Datatype *entrytype = sym->getType();
-  Datatype *ptrentrytype = glb->types->getTypePointer(sz,entrytype,spaceid->getWordSize());
+  Datatype *ptrentrytype = glb->types->getTypePointerStripArray(sz,entrytype,spaceid->getWordSize());
   bool typelock = sym->isTypeLocked();
   if (typelock && (entrytype->getMetatype() == TYPE_UNKNOWN))
     typelock = false;
@@ -405,7 +408,7 @@ void Funcdata::clearCallSpecs(void)
 
 FuncCallSpecs *Funcdata::getCallSpecs(const PcodeOp *op) const
 
-{				// Get FuncCallSpecs from CALL op
+{
   int4 i;
   const Varnode *vn;
 
@@ -416,29 +419,6 @@ FuncCallSpecs *Funcdata::getCallSpecs(const PcodeOp *op) const
   for(i=0;i<qlst.size();++i)
     if (qlst[i]->getOp() == op) return qlst[i];
   return (FuncCallSpecs *)0;
-}
-
-/// \brief Update CALL PcodeOp properties based on its corresponding call specification
-///
-/// As call specifications for a particular call site are updated, this routine pushes
-/// back properties to the particular CALL op that are relevant for analysis.
-/// \param fc is the call specification
-void Funcdata::updateOpFromSpec(FuncCallSpecs *fc)
-
-{
-  PcodeOp *op = fc->getOp();
-  if (fc->isConstructor())
-    op->setAdditionalFlag(PcodeOp::is_constructor);
-  else
-    op->clearAdditionalFlag(PcodeOp::is_constructor);
-  if (fc->isDestructor())
-    op->setAdditionalFlag(PcodeOp::is_destructor);
-  else
-    op->clearAdditionalFlag(PcodeOp::is_destructor);
-  if (fc->hasThisPointer())
-    op->setAdditionalFlag(PcodeOp::has_thisptr);
-  else
-    op->clearAdditionalFlag(PcodeOp::has_thisptr);
 }
 
 /// \brief Compare call specification objects by call site address

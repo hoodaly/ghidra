@@ -123,9 +123,8 @@ public class DockingActionProxy
 	}
 
 	@Override
-	public boolean setEnabled(boolean newValue) {
-		boolean oldValue = dockingAction.setEnabled(newValue);
-		return oldValue;
+	public void setEnabled(boolean newValue) {
+		dockingAction.setEnabled(newValue);
 	}
 
 	@Override
@@ -226,6 +225,16 @@ public class DockingActionProxy
 
 	@Override
 	public String toString() {
-		return dockingAction.getName();
+		return dockingAction.toString();
+	}
+
+	@Override
+	public void setSupportsDefaultToolContext(boolean newValue) {
+		dockingAction.setSupportsDefaultToolContext(newValue);
+	}
+
+	@Override
+	public boolean supportsDefaultToolContext() {
+		return dockingAction.supportsDefaultToolContext();
 	}
 }
